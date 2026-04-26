@@ -92,7 +92,7 @@ const Dashboard = ({ userProfile }) => {
         />
       )}
       {activeTab === 'map' && <MapPage threatsBlocked={threatsBlocked} callsAnalyzed={callsAnalyzed} onSimulateThreat={handleSimulateThreat} />}
-      {activeTab === 'profile' && <Profile name={userProfile.name} phone={userProfile.phone} voiceHash={userProfile.voiceHash} />}
+      {activeTab === 'profile' && <Profile name={userProfile.name} phone={userProfile.phone} voiceHash={userProfile.voiceHash} audioUrl={userProfile.audioUrl} />}
 
       {/* Global Scam Simulation Toast */}
       {showSimModal && simulatedScam && (

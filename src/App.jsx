@@ -6,7 +6,8 @@ import Dashboard from './pages/Dashboard';
 import './index.css';
 
 const AppContent = () => {
-  const [userProfile, setUserProfile] = useState(JSON.parse(localStorage.getItem('tv_profile') || 'null'));
+  // Start with null to show the login/onboarding flow from the beginning
+  const [userProfile, setUserProfile] = useState(null);
 
   const handleOnboardingComplete = (profile) => {
     setUserProfile(profile);

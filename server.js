@@ -72,11 +72,11 @@ const startServer = async () => {
         [phone, otp, expiresAt.toISOString()]
       );
 
-      console.log(`Generated OTP ${otp} for phone ${phone}`);
+      console.log(`\n======================================`);
+      console.log(`🔑 TRUEVOICE OTP FOR ${phone}: ${otp}`);
+      console.log(`======================================\n`);
 
-      // For development/testing, always show dev OTP
-      console.log(`Dev OTP for ${phone}: ${otp}`);
-      res.json({ success: true, message: `Dev mode - OTP: ${otp}`, simulated: true, devOtp: otp });
+      res.json({ success: true, message: 'OTP sent to terminal', simulated: true });
     });
 
     app.post('/api/verify-otp', async (req, res) => {
@@ -88,7 +88,7 @@ const startServer = async () => {
 
       const storedOtp = await db.get('SELECT * FROM otps WHERE phone = ? AND otp = ?', [phone, otp]);
 
-      if (storedOtp || (!twilioClient && otp === '1234')) {
+      if (storedOtp) {
         await db.run('DELETE FROM otps WHERE phone = ?', [phone]);
         
         let user = await db.get('SELECT * FROM users WHERE phone = ?', [phone]);

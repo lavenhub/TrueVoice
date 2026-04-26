@@ -18,11 +18,7 @@ const Onboarding = ({ onComplete }) => {
     const res = await api.sendOtp(phone);
     if (res.success) {
       setView('otp');
-      // Dev/trial mode: auto-fill OTP if server returns it
-      if (res.devOtp) {
-        setOtp(res.devOtp);
-        setOtpHint(`Dev mode: OTP is ${res.devOtp}`);
-      }
+      setOtpHint(`Check your server terminal for the security code`);
     } else {
       alert(res.error || 'Failed to send OTP');
     }
@@ -42,47 +38,52 @@ const Onboarding = ({ onComplete }) => {
   const handleRecordVoice = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      // Check for supported mime types
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       const audioChunks = [];
 
       mediaRecorder.addEventListener("dataavailable", event => {
-        audioChunks.push(event.data);
+        if (event.data.size > 0) audioChunks.push(event.data);
       });
 
       mediaRecorder.addEventListener("stop", async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunks, { type: mimeType });
+        const audioUrl = URL.createObjectURL(audioBlob);
         try {
+          if (audioChunks.length === 0) throw new Error("No audio data captured");
           const rawBuffer = await audioBlob.arrayBuffer();
           const hashBuffer = await crypto.subtle.digest('SHA-256', rawBuffer);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
           const realHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
           
-          onComplete({ voiceHash: realHash, name, phone });
+          onComplete({ voiceHash: realHash, name, phone, audioUrl });
         } catch (e) {
-          console.error("Watermarking failed", e);
-          onComplete({ voiceHash: 'fallback_hash', name, phone });
+          console.error("Recording processing failed", e);
+          onComplete({ voiceHash: 'fallback_hash_' + Date.now(), name, phone, audioUrl });
         }
       });
 
-      mediaRecorder.start();
+      mediaRecorder.start(100); // Collect data every 100ms
       setIsRecording(true);
 
       setTimeout(() => {
-        mediaRecorder.stop();
+        if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
         stream.getTracks().forEach(track => track.stop());
         setIsRecording(false);
         setView('analyzing');
       }, 5000);
     } catch (err) {
       console.error("Microphone access denied", err);
+      // Automatic fallback for demo purposes if mic fails
       setIsRecording(true);
       setTimeout(() => {
         setIsRecording(false);
         setView('analyzing');
         setTimeout(() => {
-          onComplete({ voiceHash: 'fallback_hash_' + Math.random().toString(36).substr(2, 9), name, phone });
-        }, 3000);
-      }, 3000);
+          onComplete({ voiceHash: 'demo_voice_hash_' + Math.random().toString(36).substr(2, 9), name, phone });
+        }, 2000);
+      }, 2000);
     }
   };
 
