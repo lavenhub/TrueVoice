@@ -2,7 +2,7 @@
 
 > **Insert your dashboard screenshot below:**
 > 
-> ![TrueVoice Dashboard UI](https://placehold.co/800x400/1e293b/06b6d4?text=Upload+Your+App+Screenshot+Here)
+> ![TrueVoice Dashboard UI](https://github.com/lavenhub/TrueVoice/blob/9b8ac33baff5ce7d2a21229f7e7932d145e0d6e9/Screenshot%202026-04-26%20092405.png)
 
 ## Overview
 **TrueVoice** is an AI-powered security platform designed to intercept and prevent AI voice-cloning scams. Built as a full-stack web application, it acts as an intelligent firewall for phone calls, analyzing conversational dynamics and audio signatures to determine whether a caller is a real human or a synthetic clone.
