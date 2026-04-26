@@ -29,9 +29,9 @@ const Layout = ({
 
       <div className="main-layout">
         <header className="top-header">
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border" style={{ borderColor: 'var(--glass-border)' }}>
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-            <span className="text-xs font-semibold text-secondary">System Online</span>
+          <div className="flex items-center gap-2" style={{ display: 'inline-flex' }}>
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+            <span className="font-bold text-success tracking-wide uppercase" style={{ fontSize: '0.75rem' }}>System Online</span>
           </div>
         </header>
 

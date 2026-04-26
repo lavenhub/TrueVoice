@@ -128,12 +128,18 @@ const ScamIntent = ({ setCallsAnalyzed, setThreatsBlocked }) => {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(aiReply);
         const voices = window.speechSynthesis.getVoices();
-        // Try to find a male Indian English voice to match Ramesh
-        const preferredVoice = voices.find(v => v.lang.includes('IN') && v.name.includes('Male')) || 
-                               voices.find(v => v.lang.includes('IN')) ||
+        // Prioritize Google's smooth cloud voices (Indian English first, then UK/US fallbacks)
+        // or Premium OS voices, to avoid jarring robotic default voices.
+        const preferredVoice = voices.find(v => v.name === 'Google English (India)') ||
+                               voices.find(v => v.name.includes('Google') && v.lang === 'en-IN') ||
+                               voices.find(v => v.name === 'Google UK English Female') ||
+                               voices.find(v => v.name === 'Google US English') ||
+                               voices.find(v => v.name.includes('Premium') && v.lang.startsWith('en')) ||
+                               voices.find(v => v.lang === 'en-IN') ||
                                voices[0];
         if (preferredVoice) utterance.voice = preferredVoice;
-        utterance.rate = 0.9; // Slightly slower for an elderly persona
+        utterance.rate = 0.95; // Slightly relaxed pace for a more conversational feel
+        utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
       }
       
@@ -167,7 +173,7 @@ const ScamIntent = ({ setCallsAnalyzed, setThreatsBlocked }) => {
   if (!isKeyEntered) {
     return (
       <div className="fade-in" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ backgroundColor: '#fff', padding: '2.5rem', borderRadius: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+        <div style={{ backgroundColor: '#fff', padding: '2.5rem', borderRadius: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center', marginTop: '-25vh' }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #059669)', margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <ShieldCheck size={30} color="#fff" />
           </div>
@@ -310,7 +316,7 @@ const ScamIntent = ({ setCallsAnalyzed, setThreatsBlocked }) => {
 
         {/* Right Side: Scam Detection Visualizer */}
         <div style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#000' }}>
             <ShieldAlert size={20} color={getScoreColor()} /> Live Analysis
           </h3>
 
@@ -324,7 +330,7 @@ const ScamIntent = ({ setCallsAnalyzed, setThreatsBlocked }) => {
               </svg>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <span style={{ fontSize: '2.5rem', fontWeight: 900, lineHeight: 1, color: getScoreColor() }}>{scamScore}</span>
-                <span style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.6, letterSpacing: '0.05em', color: '#fff' }}>THREAT SCORE</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, letterSpacing: '0.05em', color: '#000' }}>THREAT SCORE</span>
               </div>
             </div>
             <div style={{ marginTop: '1rem', fontWeight: 700, color: getScoreColor() }}>
@@ -353,8 +359,8 @@ const ScamIntent = ({ setCallsAnalyzed, setThreatsBlocked }) => {
                     borderLeft: `3px solid ${flag.sev === 'high' ? '#ef4444' : '#f97316'}`,
                     padding: '0.75rem', borderRadius: '0 8px 8px 0'
                   }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: flag.sev === 'high' ? '#fca5a5' : '#fdba74' }}>{flag.label}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#fff', opacity: 0.8, marginTop: '0.25rem' }}>{flag.detail}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: flag.sev === 'high' ? '#b91c1c' : '#c2410c' }}>{flag.label}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#000', opacity: 0.8, marginTop: '0.25rem' }}>{flag.detail}</div>
                   </div>
                 ))}
               </div>

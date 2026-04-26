@@ -56,7 +56,7 @@ const Onboarding = ({ onComplete }) => {
           const hashBuffer = await crypto.subtle.digest('SHA-256', rawBuffer);
           const hashArray = Array.from(new Uint8Array(hashBuffer));
           const realHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-          
+
           onComplete({ voiceHash: realHash, name, phone, audioUrl });
         } catch (e) {
           console.error("Recording processing failed", e);
@@ -89,12 +89,12 @@ const Onboarding = ({ onComplete }) => {
 
   const renderOnboarding = () => (
     <div className="fade-in flex flex-col h-full justify-center items-center">
-      <div className="text-center mb-8">
-        <div className="mx-auto bg-surface w-16 h-16 rounded-full flex items-center justify-center mb-4 text-primary">
-          <ShieldCheck size={32} />
+      <div className="flex flex-col items-center justify-center text-center w-full mb-10">
+        <div className="flex items-center justify-center bg-surface w-24 h-24 rounded-full mb-6 text-primary shadow-md" style={{ border: '1px solid rgba(255,255,255,0.8)' }}>
+          <ShieldCheck size={56} strokeWidth={1.5} />
         </div>
-        <h1 className="text-2xl font-bold">TrueVoice</h1>
-        <p>Protecting you from AI voice scams</p>
+        <h1 className="text-3xl font-bold mb-2">TrueVoice</h1>
+        <p className="text-lg text-secondary">Protecting you from AI voice scams</p>
       </div>
 
       <div className="card w-full max-w-md">
@@ -104,9 +104,9 @@ const Onboarding = ({ onComplete }) => {
             <label className="input-label">Full Name</label>
             <div className="relative flex items-center">
               <User className="absolute left-3 text-secondary" size={20} />
-              <input 
-                type="text" 
-                className="input-field" 
+              <input
+                type="text"
+                className="input-field"
                 style={{ paddingLeft: '2.5rem' }}
                 placeholder="John Doe"
                 value={name}
@@ -119,9 +119,9 @@ const Onboarding = ({ onComplete }) => {
             <label className="input-label">Mobile Number</label>
             <div className="relative flex items-center">
               <Smartphone className="absolute left-3 text-secondary" size={20} />
-              <input 
-                type="tel" 
-                className="input-field" 
+              <input
+                type="tel"
+                className="input-field"
                 style={{ paddingLeft: '2.5rem' }}
                 placeholder="+91 99999 99999"
                 value={phone}
@@ -149,9 +149,9 @@ const Onboarding = ({ onComplete }) => {
         <form onSubmit={handleVerifyOtp}>
           <div className="input-group mb-6">
             <label className="input-label text-center">Enter the 4-digit code</label>
-            <input 
-              type="text" 
-              className="input-field text-center text-xl tracking-widest" 
+            <input
+              type="text"
+              className="input-field text-center text-xl tracking-widest"
               maxLength="4"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
@@ -172,43 +172,43 @@ const Onboarding = ({ onComplete }) => {
   );
 
   const renderVoiceRegistration = () => (
-    <div className="fade-in flex flex-col h-full justify-center items-center">
-      <div className="text-center mb-6">
-        <div className="mx-auto bg-surface w-16 h-16 rounded-full flex items-center justify-center mb-4 text-primary">
-          <Fingerprint size={32} />
+    <div className="fade-in flex flex-col h-full justify-center items-center py-4">
+      <div className="flex flex-col items-center justify-center text-center w-full mb-4">
+        <div className="flex items-center justify-center bg-surface w-24 h-24 rounded-full mb-6 text-primary shadow-md" style={{ border: '1px solid rgba(255,255,255,0.8)' }}>
+          <Fingerprint size={56} strokeWidth={1.5} />
         </div>
-        <h1 className="text-2xl font-bold">Voice Registration</h1>
-        <p className="px-4 max-w-md">We'll create a unique, invisible watermark for your voice to protect you from AI cloning.</p>
+        <h1 className="text-2xl font-bold mb-1">Voice Registration</h1>
+        <p className="px-4 max-w-md text-base text-secondary leading-tight">We'll create a unique, invisible watermark for your voice to protect you from AI cloning.</p>
       </div>
 
-      <div className="card text-center py-8 w-full max-w-lg">
+      <div className="card text-center py-5 px-4 mb-2 w-full max-w-lg" style={{ marginBottom: '0.75rem' }}>
         <p className="text-sm font-medium mb-2">Please read the following sentence aloud:</p>
-        <div className="bg-surface p-4 rounded-md mb-8 text-lg font-semibold text-primary">
+        <div className="bg-surface p-3 rounded-md mb-4 text-base font-semibold text-primary">
           "My voice is my secure password and unique identity."
         </div>
 
-        <button 
-          onClick={handleRecordVoice} 
+        <button
+          onClick={handleRecordVoice}
           disabled={isRecording}
-          className={`btn ${isRecording ? 'btn-outline border-danger text-danger' : 'btn-primary'} w-auto px-8 py-4 rounded-full mx-auto flex items-center gap-2`}
+          className={`btn ${isRecording ? 'btn-outline border-danger text-danger' : 'btn-primary'} w-auto px-6 py-3 rounded-full mx-auto flex items-center gap-2`}
         >
           {isRecording ? (
             <div className="animate-pulse flex items-center gap-2">
-              <Mic size={24} /> Recording (5s)...
+              <Mic size={20} /> Recording (5s)...
             </div>
           ) : (
             <>
-              <Mic size={24} /> Tap to Record
+              <Mic size={20} /> Tap to Record
             </>
           )}
         </button>
       </div>
-      
-      <div className="bg-surface p-4 rounded-md flex items-start gap-3 mt-4 text-sm max-w-md">
-        <Lock className="text-success mt-1" size={16} />
+
+      <div className="bg-surface p-3 rounded-md flex items-start gap-3 mt-2 text-sm max-w-md">
+        <Lock className="text-success mt-0.5" size={16} />
         <div>
-          <strong>Privacy First</strong>
-          <p className="mb-0 text-xs mt-1">We do not store your raw audio. It is converted to an encrypted mathematical hash on your device.</p>
+          <strong className="text-sm block leading-tight mb-0.5">Privacy First</strong>
+          <p className="mb-0 text-xs leading-tight">We do not store your raw audio. It is converted to an encrypted mathematical hash on your device.</p>
         </div>
       </div>
     </div>
@@ -224,7 +224,7 @@ const Onboarding = ({ onComplete }) => {
       </div>
       <h2 className="text-2xl font-bold mb-2">Analyzing Voice...</h2>
       <p className="text-secondary max-w-[250px]">Generating high-frequency cryptographic watermark</p>
-      
+
       <div className="w-64 bg-surface h-2 rounded-full mt-8 overflow-hidden">
         <div className="bg-primary h-full rounded-full" style={{ width: '100%', animation: 'progress 3s linear' }}></div>
       </div>
