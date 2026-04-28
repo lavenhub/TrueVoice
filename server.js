@@ -130,3 +130,14 @@ app.listen(cloudPort, "0.0.0.0", () => {
 
 // Trigger background loading
 startServer();
+
+// 1. Point to the "dist" folder where Vite builds your frontend
+const distPath = path.join(__dirname, 'dist');
+
+// 2. Serve the static files
+app.use(express.static(distPath));
+
+// 3. For any route that isn't an API, send the index.html (Handles React Routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
