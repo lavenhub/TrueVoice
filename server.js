@@ -9,6 +9,7 @@ import { initDb } from './db.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +43,28 @@ const startServer = async () => {
     if (process.env.GROQ_API_KEY) {
       groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     }
+
+    let genAI;
+    let geminiModel;
+    if (process.env.GEMINI_API_KEY) {
+      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    }
+
+    const performGoogleSecurityAudit = async (transcript) => {
+      if (!geminiModel) return "Deep Audit unavailable: Check API Key.";
+      try {
+        const prompt = `Perform a deep psychological security audit on this transcript. 
+        Identify specific manipulation tactics (e.g., social engineering, urgency, authority feigning): "${transcript}"
+        Provide a concise, professional 2-sentence summary of the threat level.`;
+        
+        const result = await geminiModel.generateContent(prompt);
+        return result.response.text();
+      } catch (err) {
+        console.error("Gemini Audit Error:", err);
+        return "Audit scan failed during processing.";
+      }
+    };
 
     const upload = multer({ storage: multer.memoryStorage() });
 
@@ -105,13 +128,8 @@ const startServer = async () => {
     });
 
     app.post('/api/analyze-scam', authenticateToken, upload.single('audio'), async (req, res) => {
-      if (!req.file) {
-        return res.status(400).json({ error: 'Audio file is required' });
-      }
-
-      if (!groq) {
-        return res.status(500).json({ error: 'GROQ_API_KEY is not configured on the server.' });
-      }
+      if (!req.file) return res.status(400).json({ error: 'Audio file is required' });
+      if (!groq) return res.status(500).json({ error: 'GROQ_API_KEY missing' });
 
       try {
         const tempPath = path.join(__dirname, `temp_${Date.now()}.webm`);
@@ -125,55 +143,47 @@ const startServer = async () => {
         
         const transcriptText = transcription.text;
 
-        const prompt = `You are an expert fraud and scam detection AI. Please analyze the following transcript for scam intent: "${transcriptText}"
-Respond strictly in JSON format with: "transcript" (the exact text provided), "scamScore" (0-100), "reasoning" (brief reason), "flags" (array of {"label": "x", "detail": "y", "sev": "high|medium|low"}).`;
-
+        // 1. Existing Groq Analysis
+        const prompt = `You are an expert fraud and scam detection AI...`;
         const result = await groq.chat.completions.create({
           messages: [{ role: "user", content: prompt }],
           model: "llama-3.3-70b-versatile",
           response_format: { type: "json_object" }
         });
         
-        let text = result.choices[0]?.message?.content || "{}";
+        const analysis = JSON.parse(result.choices[0]?.message?.content || "{}");
 
-        const analysis = JSON.parse(text);
+        // 2. NEW: Call the Google Gemini Audit helper
+        analysis.googleDeepAudit = await performGoogleSecurityAudit(transcriptText);
 
         await db.run(
           'INSERT INTO threat_logs (user_id, type, city, severity, scam_score, transcript) VALUES (?, ?, ?, ?, ?, ?)',
-          [req.user.id, 'Scam Intent Detected', 'Mumbai, MH', analysis.scamScore > 70 ? 'high' : 'warn', analysis.scamScore, analysis.transcript]
+          [req.user.id, 'Scam Intent Detected', 'Mumbai, MH', analysis.scamScore > 70 ? 'high' : 'warn', analysis.scamScore, transcriptText]
         );
 
         res.json(analysis);
-
       } catch (error) {
-        console.error("Gemini AI Error:", error);
-        res.status(500).json({ error: 'Failed to analyze audio', details: error.message });
+        console.error("Analysis Error:", error);
+        res.status(500).json({ error: 'Failed to analyze' });
       }
     });
 
     app.post('/api/analyze-text', authenticateToken, async (req, res) => {
       const { text } = req.body;
-      if (!text || text.trim().length < 5) {
-        return res.status(400).json({ error: 'Text is required and must be at least 5 characters' });
-      }
-
-      if (!groq) {
-        return res.status(500).json({ error: 'GROQ_API_KEY is not configured on the server.' });
-      }
+      if (!text || text.trim().length < 5) return res.status(400).json({ error: 'Invalid text' });
+      if (!groq) return res.status(500).json({ error: 'Groq not configured' });
 
       try {
-        const prompt = `You are an expert fraud and scam detection AI. Analyze the provided text for scam intent: "${text}"
-Respond ONLY in valid JSON format: {"scamScore": <0-100>, "reasoning": "<brief reason>", "flags": [{"label": "x", "detail": "y", "sev": "high|medium|low"}]}`;
-
-        const result = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
+        const groqResult = await groq.chat.completions.create({
+          messages: [{ role: "user", content: `You are an expert fraud and scam detection AI...` }],
           model: "llama-3.3-70b-versatile",
           response_format: { type: "json_object" }
         });
         
-        let responseText = result.choices[0]?.message?.content || "{}";
+        const analysis = JSON.parse(groqResult.choices[0]?.message?.content || "{}");
 
-        const analysis = JSON.parse(responseText);
+        // CALL GEMINI HERE
+        analysis.googleDeepAudit = await performGoogleSecurityAudit(text);
 
         await db.run(
           'INSERT INTO threat_logs (user_id, type, city, severity, scam_score, transcript) VALUES (?, ?, ?, ?, ?, ?)',
@@ -181,13 +191,11 @@ Respond ONLY in valid JSON format: {"scamScore": <0-100>, "reasoning": "<brief r
         );
 
         res.json(analysis);
-
       } catch (error) {
-        console.error("Gemini AI Error:", error);
-        res.status(500).json({ error: 'Failed to analyze text', details: error.message });
+        console.error("Analysis Error:", error);
+        res.status(500).json({ error: 'Failed to analyze text' });
       }
     });
-
     app.get('/api/threat-logs', authenticateToken, async (req, res) => {
       const logs = await db.all('SELECT * FROM threat_logs WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
       res.json(logs);
