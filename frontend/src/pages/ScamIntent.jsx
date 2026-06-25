@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, AlertTriangle, ShieldCheck, ShieldAlert, Info, Send, Phone, PhoneOff, Radio } from 'lucide-react';
 import { api } from '../services/api';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';

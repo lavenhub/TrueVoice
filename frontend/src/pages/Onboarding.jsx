@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ShieldCheck, User, Smartphone, Fingerprint, Mic, Lock, Activity } from 'lucide-react';
-import { embedWatermark } from '../audioUtils';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 

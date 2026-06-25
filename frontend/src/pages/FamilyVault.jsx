@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Users, Plus, UserCircle, ShieldCheck, ShieldAlert, Download, Fingerprint, Mic, AlertTriangle, Activity, Zap, Cpu, Search, Trash2, Heart } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Download, Activity } from 'lucide-react';
 import { detectWatermark, computeSpectrogram } from '../audioUtils';
 
 const FamilyVault = ({ 

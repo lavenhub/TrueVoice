@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -9,24 +9,29 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       localStorage.setItem('tv_token', token);
-      // Optional: Fetch user profile if needed
     } else {
       localStorage.removeItem('tv_token');
     }
   }, [token]);
 
-  const login = (userData, userToken) => {
+  const login = useCallback((userData, userToken) => {
     setUser(userData);
     setToken(userToken);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
-  };
+  }, []);
+
+  // Memoize context value so it doesn't trigger re-renders on every parent render
+  const value = useMemo(
+    () => ({ user, token, login, logout }),
+    [user, token, login, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

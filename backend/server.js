@@ -6,7 +6,6 @@ import multer from 'multer';
 import jwt from 'jsonwebtoken';
 import Groq, { toFile } from 'groq-sdk';
 import { initDb } from './db.js';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -45,18 +44,6 @@ const startServer = async () => {
       genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     }
-
-    const performGoogleSecurityAudit = async (transcript) => {
-      if (!geminiModel) return "Deep Audit unavailable: Check API Key.";
-      try {
-        const prompt = `Perform a deep psychological security audit on this transcript: "${transcript}"`;
-        const result = await geminiModel.generateContent(prompt);
-        return result.response.text();
-      } catch (err) {
-        console.error("Gemini Audit Error:", err);
-        return "Audit scan failed.";
-      }
-    };
 
     const upload = multer({ storage: multer.memoryStorage() });
 
@@ -109,14 +96,7 @@ const startServer = async () => {
       const { phone, otp, name } = req.body;
       if (!phone || !otp) return res.status(400).json({ error: 'Phone and OTP are required' });
 
-      // Demo mode: any OTP is accepted
-      // (remove this block and uncomment below for production)
-      /*
-      const record = db.prepare(`SELECT * FROM otps WHERE phone = ?`).get(phone);
-      if (!record) return res.status(400).json({ error: 'OTP not found. Please request a new one.' });
-      if (record.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
-      if (new Date(record.expires_at) < new Date()) return res.status(400).json({ error: 'OTP expired' });
-      */
+      // Demo mode: any OTP is accepted — remove for production
 
       // Upsert user
       db.prepare(`

@@ -40,8 +40,8 @@ class SqlJsDb {
         this._save();
     }
 
-    // No-op – sql.js doesn't support pragmas the same way, but won't throw
-    pragma() {}
+    // No-op — sql.js handles WAL mode differently; intentionally left empty for API compatibility
+    pragma(_name, _value) {}
 
     prepare(sql) {
         const db = this._db;

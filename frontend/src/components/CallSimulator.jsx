@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { PhoneOff, Mic, MicOff, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import CallWaveform from './CallWaveform';
 

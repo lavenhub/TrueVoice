@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Bot } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { api } from '../services/api';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { 
