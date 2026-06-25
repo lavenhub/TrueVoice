@@ -237,8 +237,7 @@ const LiveCall = ({ forcedScenarioId, setCallsAnalyzed, setThreatsBlocked }) => 
     // Process user audio
     await new Promise(r => setTimeout(r, 500));
     const userBlob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
-    const userFile = new File([userBlob], 'user.webm', { type: 'audio/webm' });
-    
+
     // Generate synthetic clone audio for duration
     const cloneDur = Math.max(3, Math.min(callDuration, 10));
     const cloneFile = await generateCloneAudio(cloneDur);
